@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Groq</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Chatbot Groq | Usuário: <%= username %></h1>
+        <a href="/login">Sair</a>
+    </header>
+
+    <main class="chat-window">
+        <div id="messages">
+            <div class="message ia">
+                Olá! Sou o Chatbot Groq. Faça sua primeira pergunta.
+            </div>
+        </div>
+    </main>
+
+    <footer class="input-area">
+        <input type="text" id="userInput" placeholder="Digite sua mensagem...">
+        <button id="sendBtn">Enviar</button>
+    </footer>
+    
+    <script src="/js/chat.js"></script>
+</body>
+</html>
