@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const path = require("path");
 
 const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes"); // ⬅️ Importa as rotas de autenticação
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const app = express();
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/auth", authRoutes); // ⬅️ Usa as rotas de autenticação
 
 app.set("view engine", "ejs");
 
