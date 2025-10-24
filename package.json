@@ -4,8 +4,12 @@
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+<<<<<<< HEAD
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.1"
+=======
+    "mongoose": "^8.19.2"
+>>>>>>> 12d14dd9760372b56f191a880f25111515b2e0ab
   },
   "scripts": {
     "start": "node src/server.js"
