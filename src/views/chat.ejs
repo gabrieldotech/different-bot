@@ -6,18 +6,15 @@
     <title>Chat - Groq</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body class="chat-page">
     <header>
         <h1>Chatbot Groq | Usuário: <%= username %></h1>
-        <a href="/login">Sair</a>
+        <a href="#" id="logoutLink">Sair</a>
     </header>
 
     <main class="chat-window">
         <div id="messages">
-            <div class="message ia">
-                Olá! Sou o Chatbot Groq. Faça sua primeira pergunta.
-            </div>
-        </div>
+             </div>
     </main>
 
     <footer class="input-area">
@@ -25,6 +22,34 @@
         <button id="sendBtn">Enviar</button>
     </footer>
     
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script>
+        // Lógica de logout do lado do cliente (Firebase) e do servidor (Cookie)
+        const firebaseConfig = {
+            apiKey: "<%= process.env.FIREBASE_API_KEY %>",
+            authDomain: "<%= process.env.FIREBASE_AUTH_DOMAIN %>",
+            projectId: "<%= process.env.FIREBASE_PROJECT_ID %>",
+            storageBucket: "<%= process.env.FIREBASE_STORAGE_BUCKET %>",
+            messagingSenderId: "<%= process.env.FIREBASE_MESSAGING_SENDER_ID %>",
+            appId: "<%= process.env.FIREBASE_APP_ID %>"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        
+        document.getElementById('logoutLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            // 1. Logout no Cliente (Firebase Auth)
+            await auth.signOut(); 
+            
+            // 2. Logout no Servidor (Limpa o cookie)
+            await fetch('/logout'); 
+            
+            // 3. Redireciona para a página de login
+            window.location.href = '/login';
+        });
+    </script>
     <script src="/js/chat.js"></script>
 </body>
 </html>

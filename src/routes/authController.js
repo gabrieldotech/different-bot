@@ -12,7 +12,7 @@ const protect = async (req, res, next) => {
   }
   
   try {
-    // CORREÇÃO ESSENCIAL: Garante que auth() seja chamado no objeto admin
+    // Verifica o token de sessão (Mais seguro que o ID Token bruto)
     const decodedToken = await admin.auth().verifySessionCookie(idToken, true);
     req.user = decodedToken;
     next();
@@ -34,7 +34,6 @@ const verifyToken = async (req, res) => {
   const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 dias
   
   try {
-    // CORREÇÃO ESSENCIAL: Garante que auth() seja chamado no objeto admin
     const sessionCookie = await admin
       .auth()
       .createSessionCookie(idToken, { expiresIn });

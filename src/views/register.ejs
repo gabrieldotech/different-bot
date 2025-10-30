@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro - Chatbot Groq</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Crie Sua Conta</h1>
+      
+      <form id="registerForm">
+        <div class="input-group">
+            <label for="username">Nome de Usuário</label>
+            <input type="text" id="username" required>
+        </div>
+        <div class="input-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Registrar</button>
+      </form>
+
+      <p id="message"></p>
+
+      <p>
+        Já tem conta? <a href="/login">Acesse aqui.</a>
+      </p>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageElement = document.getElementById('message');
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageElement.style.color = 'green';
+                    messageElement.textContent = 'Registro bem-sucedido! Redirecionando para o chat...';
+                    // Após o registro bem-sucedido (e a criação do cookie de autenticação)
+                    window.location.href = '/chat';
+                } else {
+                    messageElement.style.color = 'red';
+                    // Exibe a mensagem de erro do backend (ex: "Usuário ou E-mail já registrado.")
+                    messageElement.textContent = data.message || 'Erro ao registrar. Tente novamente.';
+                }
+            } catch (error) {
+                messageElement.style.color = 'red';
+                messageElement.textContent = 'Erro de rede ou servidor ao tentar registrar.';
+            }
+        });
+    </script>
+  </body>
+</html>

@@ -9,10 +9,129 @@
   <body>
     <div class="container">
       <h1>Acessar Chatbot Groq</h1>
+      
+      <p id="message" style="color: red;"></p>
+
+      <h2>Login com E-mail e Senha</h2>
+      <form id="emailLoginForm">
+        <div class="input-group">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" required>
+        </div>
+        <button type="submit">Entrar / Registrar</button>
+      </form>
+
+      <h2>Ou Login Social</h2>
+      <button id="googleLoginBtn">Entrar com Google</button>
+      <button id="githubLoginBtn">Entrar com GitHub</button>
+      
       <p>
-        Esta é a página de Login.
-        <a href="/chat">Ir para o Chat (Temporário)</a>
+        O registro é automático ao usar o login social ou se cadastrar por e-mail.
       </p>
     </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    
+    <script>
+        // 1. Configuração do Firebase (Lê as chaves injetadas do server.js)
+        const firebaseConfig = {
+            apiKey: "<%= process.env.FIREBASE_API_KEY %>",
+            authDomain: "<%= process.env.FIREBASE_AUTH_DOMAIN %>",
+            projectId: "<%= process.env.FIREBASE_PROJECT_ID %>",
+            storageBucket: "<%= process.env.FIREBASE_STORAGE_BUCKET %>",
+            messagingSenderId: "<%= process.env.FIREBASE_MESSAGING_SENDER_ID %>",
+            appId: "<%= process.env.FIREBASE_APP_ID %>"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const messageElement = document.getElementById('message');
+
+        // CORREÇÃO: Força o logout do lado do cliente ao carregar /login para limpar o estado
+        auth.signOut().then(() => {
+             console.log("Estado de autenticação do cliente limpo.");
+        }).catch(error => {
+            console.error("Erro ao tentar limpar o estado de login do cliente:", error);
+        });
+        
+        // 2. Função para enviar o ID Token de volta ao servidor (para criar o cookie de sessão)
+        const sendTokenToBackend = async (user) => {
+            messageElement.style.color = 'black';
+            messageElement.textContent = 'Autenticação bem-sucedida. Criando sessão...';
+            const idToken = await user.getIdToken();
+            
+            const response = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: idToken })
+            });
+            
+            if (response.ok) {
+                window.location.href = '/chat';
+            } else {
+                messageElement.style.color = 'red';
+                messageElement.textContent = 'Erro ao criar sessão no servidor. Tente novamente.';
+                auth.signOut(); 
+            }
+        };
+        
+        // 3. Login com Provedor (Google/GitHub)
+        const socialLogin = async (provider) => {
+            try {
+                const result = await auth.signInWithPopup(provider);
+                await sendTokenToBackend(result.user);
+            } catch (error) {
+                messageElement.style.color = 'red';
+                console.error("Erro de login social:", error.code, error.message);
+                messageElement.textContent = `Erro de Login: ${error.message}`;
+            }
+        };
+        
+        // 4. Login com E-mail e Senha (Tenta logar, se falhar, tenta registrar)
+        document.getElementById('emailLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const result = await auth.signInWithEmailAndPassword(email, password);
+                messageElement.style.color = 'green';
+                messageElement.textContent = 'Login bem-sucedido. Redirecionando...';
+                await sendTokenToBackend(result.user);
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    try {
+                        const result = await auth.createUserWithEmailAndPassword(email, password);
+                        messageElement.style.color = 'green';
+                        messageElement.textContent = 'Registro bem-sucedido! Redirecionando...';
+                        await sendTokenToBackend(result.user);
+                    } catch (regError) {
+                        messageElement.style.color = 'red';
+                        messageElement.textContent = `Erro no registro: ${regError.message}`;
+                    }
+                } else {
+                    messageElement.style.color = 'red';
+                    messageElement.textContent = `Erro no Login: ${error.message}`;
+                }
+            }
+        });
+
+        // 5. Listeners para os botões sociais
+        document.getElementById('googleLoginBtn').addEventListener('click', () => {
+            const googleProvider = new firebase.auth.GoogleAuthProvider();
+            socialLogin(googleProvider);
+        });
+
+        document.getElementById('githubLoginBtn').addEventListener('click', () => {
+            const githubProvider = new firebase.auth.GithubAuthProvider();
+            socialLogin(githubProvider);
+        });
+        
+    </script>
   </body>
 </html>

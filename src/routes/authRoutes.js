@@ -1,13 +1,10 @@
-// routes/authRoutes.js
+// src/routes/authRoutes.js
 
-const express = require("express");
-const { registerUser, loginUser } = require("../controllers/authController");
+const express = require('express');
 const router = express.Router();
+const { verifyToken } = require('../controllers/authController');
 
-// Rota POST para /api/auth/register
-router.post("/register", registerUser);
-
-// Rota POST para /api/auth/login
-router.post("/login", loginUser);
+// Rota POST para receber o token do frontend e criar o cookie de sessão no backend
+router.post('/verify', verifyToken);
 
 module.exports = router;

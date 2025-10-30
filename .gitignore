@@ -1,4 +1,9 @@
-node_modules/
-.env
+# Arquivos e pastas de dependências
+/node_modules
 
+# Arquivos de ambiente e credenciais SECRETAS
+# ESSENCIAL: Contém chaves de API e caminhos confidenciais
+.env 
 
+# ESSENCIAL: Contém a chave privada de administrador do Firebase
+serviceAccountKey.json
